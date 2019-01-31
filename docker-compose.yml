@@ -1,0 +1,40 @@
+version: '2'
+volumes:
+  db-data:
+  wp-content:
+  uploads.ini:
+
+services:
+  db:
+    image: bitnami/mariadb:10.2.19-debian-9-r1
+    volumes:
+    - ./db-data:/var/lib/mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: 'OPf_eL5yfErR0d0N'
+
+  web:
+    depends_on:
+    - db
+    #    links:
+    #      - db:
+    image: wordpress:latest
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_PASSWORD: 'OPf_eL5yfErR0d0N'
+      WORDPRESS_DISABLE_WP_CRON: 'true'
+    volumes: # this is where we tell Docker what to pay attention to
+    - ./wp-content:/var/www/html/wp-content # map our uploads to the container
+    - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    ports:
+    - 80:80
+    - 443:443
+
+  phpmyadmin:
+    depends_on:
+    - db
+    image: phpmyadmin/phpmyadmin
+    ports:
+    - 8080:80
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: 'OPf_eL5yfErR0d0N'
